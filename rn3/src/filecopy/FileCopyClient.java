@@ -17,7 +17,7 @@ public class FileCopyClient extends Thread {
   public final int SERVER_PORT = 23000;
 
   public final int UDP_PACKET_SIZE = 1008;
-
+//asfvas
   // -------- Public parms
   public String servername;
 
