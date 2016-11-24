@@ -49,6 +49,7 @@ public class FileCopyClient extends Thread {
 
   public void runFileCopyClient() {
 FCpacket pinit = new FCpacket(null, SERVER_PORT);
+//bla
       // ToDo!!
 
 
