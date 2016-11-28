@@ -224,6 +224,7 @@ public class FileCopyServer {
     }
 
     // Extract parameters
+    System.out.println(parameters);
     parameterArray = parameters.split(";");
 
     if (parameterArray.length == 3) {
