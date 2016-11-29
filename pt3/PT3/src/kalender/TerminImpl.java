@@ -1,6 +1,5 @@
 package kalender;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -52,8 +51,8 @@ public class TerminImpl implements Termin {
 	@Override
 	public Map<Datum, Termin> termineIn(Monat monat) {
 		Map<Datum, Termin> map = Collections.emptyMap();
-		if (dat.compareTo(monat.getStart()) == 1) {
-			if (dat.compareTo(monat.getEnde()) == -1)
+		if (dat.compareTo(monat.getStart()) >=0) {
+			if (dat.compareTo(monat.getEnde()) <= 0)
 				map.put(dat, new TerminImpl(beschr, dat, dau));
 		}
 		return map;
@@ -62,8 +61,8 @@ public class TerminImpl implements Termin {
 	@Override
 	public Map<Datum, Termin> termineIn(Woche woche) {
 		Map<Datum, Termin> map = Collections.emptyMap();
-		if (dat.compareTo(woche.getStart()) == 1) {
-			if (dat.compareTo(woche.getEnde()) == -1)
+		if (dat.compareTo(woche.getStart()) >=0) {
+			if (dat.compareTo(woche.getEnde()) <= 0)
 				map.put(dat, new TerminImpl(beschr, dat, dau));
 		}
 		return map;
@@ -72,9 +71,35 @@ public class TerminImpl implements Termin {
 	@Override
 	public Map<Datum, Termin> termineAn(Tag tag) {
 		Map<Datum, Termin> map = Collections.emptyMap();
-		if(dat.getTag().compareTo(tag) == 0)
+		if (dat.getTag().compareTo(tag) == 0)
 			map.put(dat, new TerminImpl(beschr, dat, dau));
 		return map;
 	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Termin) || (obj == null))
+			return false;
+		return (this.getBeschreibung() == ((Termin) obj).getBeschreibung()
+				&& this.getDatum().equals(((Termin) obj).getDatum())
+				&& this.getDauer().equals(((Termin) obj).getDauer()));
+	}
+
+	@Override
+	public String toString() {
+		return String.format(this.getDatum().toString() + this.getDauer().toString() + beschr);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((beschr == null) ? 0 : beschr.hashCode());
+		result = prime * result + ((dat == null) ? 0 : dat.hashCode());
+		result = prime * result + ((dau == null) ? 0 : dau.hashCode());
+		return result;
+	}
+
 
 }

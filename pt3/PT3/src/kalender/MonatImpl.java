@@ -41,4 +41,24 @@ public class MonatImpl implements Monat {
 	public String toString() {
 		return String.format("Monat %d,%d [" + getStart() + "," + getEnde() + "]", getMonat() + 1, getJahr());
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((intern == null) ? 0 : intern.hashCode());
+		return result;
+	}
+
+	
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Monat) || (obj == null))
+			return false;
+		return (this.getMonat() == ((Monat) obj).getMonat() 
+				&& this.getJahr() == ((Monat) obj).getJahr());
+	}
+	
 }

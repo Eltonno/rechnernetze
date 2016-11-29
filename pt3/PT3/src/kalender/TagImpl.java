@@ -10,17 +10,15 @@ import kalender.interfaces.Tag;
 public class TagImpl implements Tag {
 
 	private Calendar intern;
-	Datum start;
-	Datum ende;
-	int jahr;
-	int monat;
 
 	public TagImpl(int jahr, int tagImJahr) {
+		intern.clear();
 		intern.set(Calendar.YEAR, jahr);
 		intern.set(Calendar.DAY_OF_YEAR, tagImJahr);
 	}
 
 	public TagImpl(int jahr, int monat, int tagImMonat) {
+		intern.clear();
 		intern.set(jahr, monat, tagImMonat);
 	}
 
@@ -30,12 +28,12 @@ public class TagImpl implements Tag {
 
 	@Override
 	public Datum getStart() {
-		return start;
+		return new DatumImpl(this, new UhrzeitImpl());
 	}
 
 	@Override
 	public Datum getEnde() {
-		return ende;
+		return new DatumImpl(this, new UhrzeitImpl(23, 59));
 	}
 
 	@Override
@@ -75,12 +73,27 @@ public class TagImpl implements Tag {
 	}
 
 	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
 		if (!(obj instanceof Tag) || (obj == null))
 			return false;
-		if (this.inBasis().equals(((Tag) obj).inBasis())) {
-			return true;
-		} else {
-			return false;
-		}
+		return (this.inBasis().compareTo(((Tag) obj).inBasis())==0);
 	}
+	
+
+	@Override
+	public String toString() {
+ 		return String.format("Tag %d,%d.%d [" + getStart() + "," + getEnde() + "]", getTagImMonat(), getMonat() + 1,
+				getJahr());
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((intern == null) ? 0 : intern.hashCode());
+		return result;
+	}
+
+	
 }

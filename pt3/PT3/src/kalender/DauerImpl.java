@@ -2,13 +2,16 @@ package kalender;
 
 import kalender.interfaces.Datum;
 import kalender.interfaces.Dauer;
-import kalender.interfaces.Tag;
 
 public class DauerImpl implements Dauer {
 
 	private int minuten;
+	final static int mToS = 60;
+	final static int sToD = 24;
+	final static int dToW = 7;
 
 	public DauerImpl(Datum d1, Datum d2) {
+		this(d1.abstand(d2).inMinuten());
 	}
 
 	public DauerImpl(int minuten) {
@@ -16,20 +19,20 @@ public class DauerImpl implements Dauer {
 	}
 
 	public DauerImpl(int stunden, int minuten) {
-		this(stunden * 60 + minuten);
+		this(stunden * mToS + minuten);
 	}
 
 	public DauerImpl(int tage, int stunden, int minuten) {
-		this(tage * 24 + stunden, minuten);
+		this(tage * sToD + stunden, minuten);
 	}
 
 	@Override
 	public int compareTo(Dauer o) {
-		if(o.inMinuten()>this.inMinuten()){
+		if (o.inMinuten() > this.inMinuten()) {
 			return 1;
-		}else if(o.inMinuten() == this.inMinuten()){
+		} else if (o.inMinuten() == this.inMinuten()) {
 			return 0;
-		}else {
+		} else {
 			return -1;
 		}
 	}
@@ -41,47 +44,61 @@ public class DauerImpl implements Dauer {
 
 	@Override
 	public int inStunden() {
-		return (minuten/60);
+		return (minuten / mToS);
 	}
 
 	@Override
 	public int inTagen() {
-		return (inStunden()/24);
+		return (inStunden() / sToD);
 	}
 
 	@Override
 	public int inWochen() {
-		return (inTagen()/7);
+		return (inTagen() / dToW);
 	}
 
 	@Override
 	public int anteilMinuten() {
-		return minuten;
+		return minuten - (anteilStunden());
 	}
 
 	@Override
 	public int anteilStunden() {
-		return inStunden()*60;
+		return inStunden() * mToS - (anteilTage());
 	}
 
 	@Override
 	public int anteilTage() {
-		return inTagen()*24*60;
+		return (inTagen() * sToD * mToS) - (anteilWochen());
 	}
 
 	@Override
 	public int anteilWochen() {
-		return inWochen()*7*24*60;
+		return inWochen() * dToW * sToD * mToS;
 	}
-	
-	public boolean equals(Object obj){
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
 		if (!(obj instanceof Dauer) || (obj == null))
 			return false;
-		if (minuten == ((Dauer) obj).inMinuten()) {
-			return true;
-		} else {
-			return false;
-		}
-		
+		return (this.compareTo((Dauer) obj) == 0);
 	}
+
+	
+	@Override
+	public String toString() {
+		return String.format("Dauer: %dWochen, %dTage, %dStunden, %dMinuten", inWochen(), inTagen(), inStunden(),
+				inMinuten());
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + minuten;
+		return result;
+	}
+
+	
 }

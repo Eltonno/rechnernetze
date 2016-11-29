@@ -118,5 +118,28 @@ public class DatumImpl implements Datum {
 	public Calendar inBasis() {
 		return (Calendar) intern.clone();
 	}
+	
+	@Override
+	public String toString(){
+		return String.format(this.getTag().toString() + this.getUhrzeit().toString());
+	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((intern == null) ? 0 : intern.hashCode());
+		return result;
+	}
+
+
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Datum) || (obj == null))
+			return false;
+		return (this.inBasis().compareTo(((Datum) obj).inBasis())==0);
+	}
+	
 }

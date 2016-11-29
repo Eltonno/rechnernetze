@@ -27,7 +27,8 @@ public class UhrzeitImpl implements Uhrzeit {
 
 	@Override
 	public int compareTo(Uhrzeit o) {
-		if ((o.getStunde() > this.getStunde()) || (o.getStunde() == this.getStunde()) && (o.getMinuten() > this.getMinuten())) {
+		if ((o.getStunde() > this.getStunde())
+				|| (o.getStunde() == this.getStunde()) && (o.getMinuten() > this.getMinuten())) {
 			return 1;
 		} else if ((o.getStunde() == this.getStunde()) && (o.getMinuten() == this.getMinuten())) {
 			return 0;
@@ -47,12 +48,27 @@ public class UhrzeitImpl implements Uhrzeit {
 	}
 
 	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
 		if (!(obj instanceof Uhrzeit) || (obj == null))
 			return false;
-		if ((((Uhrzeit) obj).getStunde() == this.getStunde()) && (((Uhrzeit) obj).getMinuten() == this.getMinuten())) {
-			return true;
-		} else {
-			return false;
-		}
+		return (this.compareTo((Uhrzeit) obj) == 0);
 	}
+	
+	
+	@Override
+	public String toString() {
+		return String.format("Uhrzeit: %2d:%2d", getStunde(),
+				getMinuten());
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((intern == null) ? 0 : intern.hashCode());
+		return result;
+	}
+
+	
 }

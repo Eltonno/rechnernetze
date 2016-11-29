@@ -3,7 +3,6 @@ package kalender;
 import java.util.Calendar;
 
 import kalender.interfaces.Datum;
-import kalender.interfaces.Dauer;
 import kalender.interfaces.Woche;
 
 public class WocheImpl implements Woche {
@@ -55,11 +54,29 @@ public class WocheImpl implements Woche {
 				new UhrzeitImpl(23, 59));
 	}
 
-
 	@Override
 	public String toString() {
 		return String.format("Woche %d,%d.%d [" + getStart() + "," + getEnde() + "]", getWocheImMonat(), getMonat() + 1,
 				getJahr());
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((intern == null) ? 0 : intern.hashCode());
+		return result;
+	}
+
+
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Woche) || (obj == null))
+			return false;
+		return (this.getMonat() == ((Woche) obj).getMonat() && this.getJahr() == ((Woche) obj).getJahr()
+				&& this.getWocheImMonat() == ((Woche) obj).getWocheImMonat());
+	}
+	
 }
