@@ -1,13 +1,13 @@
 package kalender;
 
 public enum WiederholungType {
-	TAEGLICH("tÃ¤glich") {
+	TAEGLICH("täglich") {
 		@Override
 		public int inTagen() {
 			return 1;
 		}
 	},
-	WOECHENTLICH("wÃ¶chentlich") {
+	WOECHENTLICH("wöchentlich") {
 		@Override
 		public int inTagen() {
 			return 7;

@@ -100,5 +100,7 @@ public class DauerImpl implements Dauer {
 		return result;
 	}
 
+
+
 	
 }

@@ -131,15 +131,4 @@ public class DatumImpl implements Datum {
 		result = prime * result + ((intern == null) ? 0 : intern.hashCode());
 		return result;
 	}
-
-
-
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!(obj instanceof Datum) || (obj == null))
-			return false;
-		return (this.inBasis().compareTo(((Datum) obj).inBasis())==0);
-	}
-	
 }

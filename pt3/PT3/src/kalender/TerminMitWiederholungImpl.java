@@ -19,7 +19,7 @@ public class TerminMitWiederholungImpl extends TerminImpl implements TerminMitWi
 
 	private Wiederholung wdh;
 
- // TODO Konstruktorprobleme auflÃ¶sen
+ // TODO Konstruktorprobleme auflösen
 	public TerminMitWiederholungImpl(String beschreibung, Datum start, Dauer dauer, WiederholungType type, int anzahl,
 			int zyklus) {
 		super(beschreibung, start, dauer);
@@ -37,19 +37,19 @@ public class TerminMitWiederholungImpl extends TerminImpl implements TerminMitWi
 
 	@Override
 	public Map<Datum, Termin> termineIn(Monat monat) {
-		// TODO auf termineFuer zurÃ¼ckfÃ¼hren
+		// TODO auf termineFuer zurückführen
 		return null;
 	}
 
 	@Override
 	public Map<Datum, Termin> termineIn(Woche woche) {
-		// TODO auf termineFuer zurÃ¼ckfÃ¼hren
+		// TODO auf termineFuer zurückführen
 		return null;
 	}
 
 	@Override
 	public Map<Datum, Termin> termineAn(Tag tag) {
-		// TODO auf termineFuer zurÃ¼ckfÃ¼hren
+		// TODO auf termineFuer zurückführen
 		return null;
 	}
 
