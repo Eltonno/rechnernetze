@@ -12,12 +12,12 @@ public interface TerminMitWiederholung extends Termin, Iterable<Termin> {
 	public Wiederholung getWdh();
 	/*
 	 * Ein Iterator, der in einem vorgebenen Intervall das Datum der
-	 * Wiederholungen des Termins, die in dem Intervall liegen, zurÃ¼ckliefert.
+	 * Wiederholungen des Termins, die in dem Intervall liegen, zurückliefert.
 	 * 
 	 * von ist der erste Intervallindex (inkl.), bis letzte Intervallindex
 	 * (inkl.).
 	 * 
-	 * Zu Details siehe ErlÃ¤uterung zur Implementierung in der Klasse
+	 * Zu Details siehe Erläuterung zur Implementierung in der Klasse
 	 * TerminMitWiederholungImpl.
 	 */
 	public IntervallIterator<Datum> intervallIterator(int von, int bis);
