@@ -48,9 +48,13 @@ public class FileCopyClient extends Thread {
 	}
 
 	public void runFileCopyClient() throws IOException {
-		String string = "'"+destPath+"';'"+windowSize+"';'"+serverErrorRate+"'";
+		FCpacket[] sendbuffer = new FCpacket[windowSize];
+		int sendbase = 0;
+		int nextSeqNum;
+		String string = "'"+destPath+windowSize+serverErrorRate+"'";
 		byte[] seq = new byte[]{0,0,0,0,0,0,0,0};
-		byte[] buf = string.getBytes();
+		byte[] buf = new byte[1008];
+		buf = string.getBytes("UTF-8");
 		
 		FCpacket pinit = new FCpacket(0, buf, buf.length);
 		DatagramSocket clientSocket = new DatagramSocket();
