@@ -51,17 +51,20 @@ public class FileCopyClient extends Thread {
 		FCpacket[] sendbuffer = new FCpacket[windowSize];
 		int sendbase = 0;
 		int nextSeqNum;
-		String string = "'"+destPath+windowSize+serverErrorRate+"'";
+		String string = destPath+";"+windowSize+";"+serverErrorRate;
 		byte[] seq = new byte[]{0,0,0,0,0,0,0,0};
 		byte[] buf = new byte[1008];
-		buf = string.getBytes("UTF-8");
+		int i;
+		for(i = 0; i<string.length(); i++){
+			buf[i] = (byte) string.charAt(i);
+		}
 		
-		FCpacket pinit = new FCpacket(0, buf, buf.length);
+		FCpacket pinit = makeControlPacket();
 		DatagramSocket clientSocket = new DatagramSocket();
 		InetAddress address = InetAddress.getByName("localhost");
 		SocketAddress add = new InetSocketAddress(address, SERVER_PORT);
 		clientSocket.connect(add);
-		DatagramPacket packet = new DatagramPacket(concatenate(seq, buf), buf.length, address, SERVER_PORT);
+		DatagramPacket packet = new DatagramPacket(pinit.getSeqNumBytesAndData(), pinit.getLen()+8, address, SERVER_PORT);
 		clientSocket.send(packet);
 	}
 
