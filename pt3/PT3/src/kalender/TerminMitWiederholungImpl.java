@@ -28,7 +28,7 @@ public class TerminMitWiederholungImpl extends TerminImpl implements TerminMitWi
 	public TerminMitWiederholungImpl(String beschreibung, Datum start, Dauer dauer, Wiederholung wdh) {
 		super(beschreibung, start, dauer);
 	}
-
+//added crap
 	public Wiederholung getWdh() {
 		return new WiederholungImpl(wdh);
 	}
