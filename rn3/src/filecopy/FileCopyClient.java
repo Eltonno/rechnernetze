@@ -29,6 +29,8 @@ public class FileCopyClient extends Thread {
 	public int windowSize;
 
 	public long serverErrorRate;
+	
+	
 
 	// -------- Variables
 	// current default timeout in nanoseconds
@@ -48,16 +50,13 @@ public class FileCopyClient extends Thread {
 	}
 
 	public void runFileCopyClient() throws IOException {
+		FileInputStream inputstream = new FileInputStream(sourcePath);
+		
 		FCpacket[] sendbuffer = new FCpacket[windowSize];
 		int sendbase = 0;
 		int nextSeqNum;
-		String string = destPath+";"+windowSize+";"+serverErrorRate;
-		byte[] seq = new byte[]{0,0,0,0,0,0,0,0};
 		byte[] buf = new byte[1008];
-		int i;
-		for(i = 0; i<string.length(); i++){
-			buf[i] = (byte) string.charAt(i);
-		}
+		inputstream.read(buf, 0, 1000);
 		
 		FCpacket pinit = makeControlPacket();
 		DatagramSocket clientSocket = new DatagramSocket();
@@ -133,17 +132,5 @@ public class FileCopyClient extends Thread {
 		FileCopyClient myClient = new FileCopyClient(argv[0], argv[1], argv[2], argv[3], argv[4]);
 		myClient.runFileCopyClient();
 	}
-	private byte[] concatenate(byte[] ba1, byte[] ba2) {
-	    int len1 = ba1.length;
-	    int len2 = ba2.length;
-	    byte[] result = new byte[len1 + len2];
-
-	    // Fill with first array
-	    System.arraycopy(ba1, 0, result, 0, len1);
-	    // Fill with second array
-	    System.arraycopy(ba2, 0, result, len1, len2);
-
-	    return result;
-	  }
-
+	
 }
