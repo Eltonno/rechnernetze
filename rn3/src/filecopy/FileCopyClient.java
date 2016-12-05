@@ -64,7 +64,7 @@ public class FileCopyClient extends Thread {
 
 	static DatagramSocket clientSocket;
 
-	static long sendbase = 1;
+	static long sendbase = 0L;
 	// ... ToDo
 
 	// Constructor
@@ -75,9 +75,9 @@ public class FileCopyClient extends Thread {
 		destPath = destPathArg;
 		windowSize = Integer.parseInt(windowSizeArg);
 		serverErrorRate = Long.parseLong(errorRateArg);
-		total_rtt=0L;
-	    received_acks=0L;
-	    retransmit_packs=0L;
+		total_rtt = 0L;
+		received_acks = 0L;
+		retransmit_packs = 0L;
 
 	}
 
@@ -93,6 +93,7 @@ public class FileCopyClient extends Thread {
 		DatagramPacket packet = new DatagramPacket(pinit.getSeqNumBytesAndData(), pinit.getLen() + 8, address,
 				SERVER_PORT);
 		clientSocket.send(packet);
+		sendbuffer.put(0L, pinit);
 		while (true) {
 			while (inputstream.available() != 0 && sendbuffer.size() < windowSize) {
 				inputstream.read(buf);
@@ -149,8 +150,8 @@ public class FileCopyClient extends Thread {
 		DatagramPacket pack = new DatagramPacket(fcp.getSeqNumBytesAndData(), fcp.getLen() + 8, address, SERVER_PORT);
 		clientSocket.send(pack);
 		retransmit_packs++;
-		fcp.setTimestamp(System.nanoTime());
-		startTimer(fcp);
+		sendbuffer.get(seqNum).setTimestamp(System.nanoTime());
+		startTimer(sendbuffer.get(seqNum));
 	}
 
 	/**
@@ -201,48 +202,53 @@ public class FileCopyClient extends Thread {
 		(new FileCopyClient(argv[0], argv[1], argv[2], argv[3], argv[4])).start();
 		myClient.runFileCopyClient();
 	}
-	
-	public static void ack_plus(){
+
+	public static void ack_plus() {
 		received_acks++;
 	}
-	public static void rtt_plus(long rtt){
+
+	public static void rtt_plus(long rtt) {
 		total_rtt = total_rtt + rtt;
 	}
-	public static void sendbase_plus(){
+
+	public static void sendbase_plus() {
 		sendbase++;
 	}
-	
-	
 
 	@Override
 	public void run() {
 		try {
 			byte[] data = new byte[FileCopyClient.UDP_PACKET_SIZE];
 			while (true) {
+
 				DatagramPacket udpReceivePacket = new DatagramPacket(data, data.length);
 				// Wait for data packet
 				clientSocket.receive(udpReceivePacket);
-			    rtt = System.nanoTime() - timestamp;
 				FCpacket ackpack = new FCpacket(udpReceivePacket.getData(), udpReceivePacket.getLength());
 				long receivedSeqNumber = ackpack.getSeqNum();
-				cancelTimer(sendbuffer.get(receivedSeqNumber));
-				long packrtt = System.nanoTime() - sendbuffer.get(receivedSeqNumber).getTimestamp();
-				rtt_plus(packrtt);
-				computeTimeoutValue(packrtt);
-				sendbuffer.get(receivedSeqNumber).setValidACK(true);
-				if (sendbuffer.containsKey(receivedSeqNumber) && receivedSeqNumber == sendbase) {
-					FileCopyClient.ack_plus();
-					sendbuffer.remove(receivedSeqNumber);
-					FileCopyClient.sendbase_plus();
-				}
-				while(sendbuffer.containsKey(sendbase) && sendbuffer.get(sendbase).isValidACK()) {
-					FileCopyClient.ack_plus();
-					sendbuffer.remove(receivedSeqNumber);
-					FileCopyClient.sendbase_plus();
+				System.out.println(receivedSeqNumber);
+				if (sendbuffer.containsKey(receivedSeqNumber)) {
+					cancelTimer(sendbuffer.get(receivedSeqNumber));
+					long packrtt = System.nanoTime() - sendbuffer.get(receivedSeqNumber).getTimestamp();
+					System.out.println(packrtt);
+					rtt_plus(packrtt);
+					computeTimeoutValue(packrtt);
+					sendbuffer.get(receivedSeqNumber).setValidACK(true);
+					if (receivedSeqNumber == sendbase) {
+						FileCopyClient.ack_plus();
+						sendbuffer.remove(receivedSeqNumber);
+						FileCopyClient.sendbase_plus();
+						while (sendbuffer.containsKey(sendbase) && sendbuffer.get(sendbase).isValidACK()) {
+							FileCopyClient.ack_plus();
+							sendbuffer.remove(receivedSeqNumber);
+							FileCopyClient.sendbase_plus();
+
+						}
+					}
 				}
 			}
 		} catch (Exception e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 }
