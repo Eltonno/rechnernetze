@@ -231,8 +231,10 @@ public class FileCopyClient extends Thread {
 					cancelTimer(sendbuffer.get(receivedSeqNumber));
 					long packrtt = System.nanoTime() - sendbuffer.get(receivedSeqNumber).getTimestamp();
 					System.out.println(packrtt);
+					if(receivedSeqNumber!=0){
 					rtt_plus(packrtt);
 					computeTimeoutValue(packrtt);
+					}
 					sendbuffer.get(receivedSeqNumber).setValidACK(true);
 					if (receivedSeqNumber == sendbase) {
 						FileCopyClient.ack_plus();
