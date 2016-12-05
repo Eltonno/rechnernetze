@@ -90,6 +90,7 @@ public class FileCopyClient extends Thread {
 				packet = new DatagramPacket(pinit.getSeqNumBytesAndData(), pinit.getLen() + 8, address, SERVER_PORT);
 				pinit.setTimestamp(System.nanoTime());
 				clientSocket.send(packet);
+				startTimer(pinit);
 				sendbuffer.put(nextSeqNum, pinit);
 				nextSeqNum += 1;
 			}
