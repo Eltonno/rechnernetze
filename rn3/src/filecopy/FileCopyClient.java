@@ -31,6 +31,8 @@ public class FileCopyClient extends Thread {
 	public String sourcePath;
 
 	public String destPath;
+	
+	static public InetAddress address;
 
 	public int windowSize;
 
@@ -39,8 +41,14 @@ public class FileCopyClient extends Thread {
 	// -------- Variables
 	// current default timeout in nanoseconds
 	private long timeoutValue = 100000000L;
+	
+	public long timestamp;
 
 	private byte[] receiveData;
+	
+	private long rtt;
+	
+	private long jitter = 0L;
 
 	FileInputStream inputstream;
 
@@ -72,7 +80,6 @@ public class FileCopyClient extends Thread {
 
 		pinit = makeControlPacket();
 
-		InetAddress address = InetAddress.getByName("localhost");
 		DatagramPacket packet = new DatagramPacket(pinit.getSeqNumBytesAndData(), pinit.getLen() + 8, address,
 				SERVER_PORT);
 		clientSocket.send(packet);
@@ -81,6 +88,7 @@ public class FileCopyClient extends Thread {
 				inputstream.read(buf);
 				pinit = new FCpacket(nextSeqNum, buf, buf.length);
 				packet = new DatagramPacket(pinit.getSeqNumBytesAndData(), pinit.getLen() + 8, address, SERVER_PORT);
+				pinit.setTimestamp(System.nanoTime());
 				clientSocket.send(packet);
 				sendbuffer.put(nextSeqNum, pinit);
 				nextSeqNum += 1;
@@ -110,9 +118,14 @@ public class FileCopyClient extends Thread {
 
 	/**
 	 * Implementation specific task performed at timeout
+	 * @throws IOException 
 	 */
-	public void timeoutTask(long seqNum) {
-		// ToDo
+	public void timeoutTask(long seqNum) throws IOException {
+		FCpacket fcp = sendbuffer.get(seqNum);
+		DatagramPacket pack = new DatagramPacket(fcp.getSeqNumBytesAndData(), fcp.getLen() + 8, address, SERVER_PORT);
+		clientSocket.send(pack);
+		fcp.setTimestamp(System.nanoTime());
+		startTimer(fcp);
 	}
 
 	/**
@@ -120,9 +133,16 @@ public class FileCopyClient extends Thread {
 	 * Computes the current timeout value (in nanoseconds)
 	 */
 	public void computeTimeoutValue(long sampleRTT) {
-
-		// ToDo
-	}
+		int timeoutsec = (int) (timeoutValue/1000000);
+	    double x = 0.25;
+	    double y = x/2;
+	    long expRTT = (long) ((1-y) *sampleRTT + y*timeoutValue);
+	    long absolut = Math.abs(sampleRTT - rtt);
+	    long newjitter = (long) ((1-x) * jitter + x *  absolut);
+	    rtt = sampleRTT;
+	    timeoutValue = expRTT + 4*newjitter;
+	    System.out.println("new timeout: " + timeoutsec + "micro s");
+	  }
 
 	/**
 	 *
@@ -150,6 +170,7 @@ public class FileCopyClient extends Thread {
 	}
 
 	public static void main(String argv[]) throws Exception {
+		address = InetAddress.getByName("localhost");
 		FileCopyClient myClient = new FileCopyClient(argv[0], argv[1], argv[2], argv[3], argv[4]);
 		clientSocket = new DatagramSocket();
 		sendbuffer = new HashMap<Long, FCpacket>();
@@ -165,10 +186,14 @@ public class FileCopyClient extends Thread {
 				DatagramPacket udpReceivePacket = new DatagramPacket(data, data.length);
 				// Wait for data packet
 				clientSocket.receive(udpReceivePacket);
+			    rtt = System.nanoTime() - timestamp + 10000000L;
 				FCpacket ackpack = new FCpacket(udpReceivePacket.getData(), udpReceivePacket.getLength());
 				long receivedSeqNumber = ackpack.getSeqNum();
 				if (sendbuffer.containsKey(receivedSeqNumber)) {
+					cancelTimer(sendbuffer.get(receivedSeqNumber));
 					sendbuffer.remove(receivedSeqNumber);
+					long packrtt = System.nanoTime() - ackpack.getTimestamp();
+					computeTimeoutValue(packrtt);
 //					if(sendbuffer.size() >= 0)
 //					sendbase = Collections.min(sendbuffer.keySet());
 					System.out.println(sendbase);

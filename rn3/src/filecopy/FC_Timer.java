@@ -1,5 +1,7 @@
 package filecopy;
 
+import java.io.IOException;
+
 /* FC_Timer.java
  Version 1.0
  Praktikum Rechnernetze HAW Hamburg
@@ -46,7 +48,12 @@ public class FC_Timer extends Thread {
 
     /* Perform task if not cancelled */
     if (!isCancelled) {
-      myFCC.timeoutTask(seqNum);
+      try {
+		myFCC.timeoutTask(seqNum);
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
     }
   }
 }
