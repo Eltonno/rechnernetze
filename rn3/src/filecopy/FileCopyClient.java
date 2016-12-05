@@ -31,7 +31,7 @@ public class FileCopyClient extends Thread {
 	public String sourcePath;
 
 	public String destPath;
-	
+
 	static public InetAddress address;
 
 	public int windowSize;
@@ -41,13 +41,19 @@ public class FileCopyClient extends Thread {
 	// -------- Variables
 	// current default timeout in nanoseconds
 	private long timeoutValue = 100000000L;
-	
+
 	public long timestamp;
 
 	private byte[] receiveData;
-	
+
 	private long rtt;
-	
+
+	private long retransmit_packs;
+
+	public static long received_acks;
+
+	private static long total_rtt;
+
 	private long jitter = 0L;
 
 	FileInputStream inputstream;
@@ -69,14 +75,18 @@ public class FileCopyClient extends Thread {
 		destPath = destPathArg;
 		windowSize = Integer.parseInt(windowSizeArg);
 		serverErrorRate = Long.parseLong(errorRateArg);
+		total_rtt=0L;
+	    received_acks=0L;
+	    retransmit_packs=0L;
 
 	}
 
-	public void runFileCopyClient() throws IOException {
+	public void runFileCopyClient() throws IOException, InterruptedException {
 		inputstream = new FileInputStream(sourcePath);
 		// clientSocket = new DatagramSocket();
 		long nextSeqNum = 1;
 		byte[] buf = new byte[1000];
+		long starttime = System.nanoTime();
 
 		pinit = makeControlPacket();
 
@@ -94,7 +104,19 @@ public class FileCopyClient extends Thread {
 				sendbuffer.put(nextSeqNum, pinit);
 				nextSeqNum += 1;
 			}
+			if (inputstream.available() == 0) {
+				break;
+			}
 		}
+		TimeUnit.SECONDS.sleep(3);
+		long total_time = System.nanoTime() - starttime;
+		System.out.println("-------------------- END OF DATA TRANSFER ------------------");
+		System.out.println("Total_Time: " + total_time + "ns");
+		System.out.println("Number of Retransmit: " + retransmit_packs);
+		System.out.println("Number of Received Acks: " + received_acks);
+		System.out.println("Total rtt: " + total_rtt);
+		long average_rtt = total_rtt / received_acks;
+		System.out.println("Average RTT: " + average_rtt + " ns");
 	}
 
 	/**
@@ -119,12 +141,14 @@ public class FileCopyClient extends Thread {
 
 	/**
 	 * Implementation specific task performed at timeout
-	 * @throws IOException 
+	 * 
+	 * @throws IOException
 	 */
 	public void timeoutTask(long seqNum) throws IOException {
 		FCpacket fcp = sendbuffer.get(seqNum);
 		DatagramPacket pack = new DatagramPacket(fcp.getSeqNumBytesAndData(), fcp.getLen() + 8, address, SERVER_PORT);
 		clientSocket.send(pack);
+		retransmit_packs++;
 		fcp.setTimestamp(System.nanoTime());
 		startTimer(fcp);
 	}
@@ -134,16 +158,15 @@ public class FileCopyClient extends Thread {
 	 * Computes the current timeout value (in nanoseconds)
 	 */
 	public void computeTimeoutValue(long sampleRTT) {
-		int timeoutsec = (int) (timeoutValue/1000000);
-	    double x = 0.25;
-	    double y = x/2;
-	    long expRTT = (long) ((1-y) *sampleRTT + y*timeoutValue);
-	    long absolut = Math.abs(sampleRTT - rtt);
-	    long newjitter = (long) ((1-x) * jitter + x *  absolut);
-	    rtt = sampleRTT;
-	    timeoutValue = expRTT + 4*newjitter;
-	    System.out.println("new timeout: " + timeoutsec + "micro s");
-	  }
+		int timeoutsec = (int) (timeoutValue / 1000000);
+		double x = 0.25;
+		double y = x / 2;
+		long expRTT = (long) ((1 - y) * sampleRTT + y * timeoutValue);
+		long absolut = Math.abs(sampleRTT - rtt);
+		long newjitter = (long) ((1 - x) * jitter + x * absolut);
+		rtt = sampleRTT;
+		timeoutValue = expRTT + 4 * newjitter;
+	}
 
 	/**
 	 *
@@ -178,6 +201,15 @@ public class FileCopyClient extends Thread {
 		(new FileCopyClient(argv[0], argv[1], argv[2], argv[3], argv[4])).start();
 		myClient.runFileCopyClient();
 	}
+	
+	public static void ack_plus(){
+		received_acks++;
+	}
+	public static void rtt_plus(long rtt){
+		total_rtt = total_rtt + rtt;
+	}
+	
+	
 
 	@Override
 	public void run() {
@@ -187,17 +219,21 @@ public class FileCopyClient extends Thread {
 				DatagramPacket udpReceivePacket = new DatagramPacket(data, data.length);
 				// Wait for data packet
 				clientSocket.receive(udpReceivePacket);
-			    rtt = System.nanoTime() - timestamp + 10000000L;
+			    rtt = System.nanoTime() - timestamp;
 				FCpacket ackpack = new FCpacket(udpReceivePacket.getData(), udpReceivePacket.getLength());
 				long receivedSeqNumber = ackpack.getSeqNum();
 				if (sendbuffer.containsKey(receivedSeqNumber)) {
+					FileCopyClient.ack_plus();
 					cancelTimer(sendbuffer.get(receivedSeqNumber));
+					long packrtt = System.nanoTime() - sendbuffer.get(receivedSeqNumber).getTimestamp();
 					sendbuffer.remove(receivedSeqNumber);
-					long packrtt = System.nanoTime() - ackpack.getTimestamp();
+					System.out.println(packrtt);
+					rtt_plus(packrtt);
 					computeTimeoutValue(packrtt);
+//					received_acks++;
 //					if(sendbuffer.size() >= 0)
 //					sendbase = Collections.min(sendbuffer.keySet());
-					System.out.println(sendbase);
+					//System.out.println(sendbase);
 				}
 			}
 		} catch (Exception e) {
