@@ -67,7 +67,7 @@ public class FileCopyServer {
         // Wait for data packet
         serverSocket.receive(udpReceivePacket);
         receivedIPAddress = udpReceivePacket.getAddress();
-        System.out.println(receivedPort = udpReceivePacket.getPort());
+        receivedPort = udpReceivePacket.getPort();
 
         if (connectionEstablished == false) {
           // Establish new connection

@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -43,11 +44,13 @@ public class FileCopyClient extends Thread {
 
 	FileInputStream inputstream;
 
-	Map<Integer, FCpacket> sendbuffer;
+	static Map<Long, FCpacket> sendbuffer;
 
 	FCpacket pinit;
 
 	static DatagramSocket clientSocket;
+
+	long sendbase = 0;
 	// ... ToDo
 
 	// Constructor
@@ -61,12 +64,10 @@ public class FileCopyClient extends Thread {
 
 	}
 
-	public void runFileCopyClient() throws IOException, InterruptedException {
+	public void runFileCopyClient() throws IOException {
 		inputstream = new FileInputStream(sourcePath);
-		sendbuffer = new HashMap<Integer, FCpacket>();
-//		clientSocket = new DatagramSocket();
-		int sendbase = 0;
-		int nextSeqNum = 1;
+		// clientSocket = new DatagramSocket();
+		long nextSeqNum = 1;
 		byte[] buf = new byte[1000];
 
 		pinit = makeControlPacket();
@@ -76,9 +77,7 @@ public class FileCopyClient extends Thread {
 				SERVER_PORT);
 		clientSocket.send(packet);
 		while (true) {
-				TimeUnit.SECONDS.sleep(1);
-			while (inputstream.available() != 0 && sendbuffer.size() <= windowSize) {
-				System.out.println(sendbuffer.size());
+			while (inputstream.available() != 0 && sendbuffer.size() < windowSize) {
 				inputstream.read(buf);
 				pinit = new FCpacket(nextSeqNum, buf, buf.length);
 				packet = new DatagramPacket(pinit.getSeqNumBytesAndData(), pinit.getLen() + 8, address, SERVER_PORT);
@@ -153,6 +152,7 @@ public class FileCopyClient extends Thread {
 	public static void main(String argv[]) throws Exception {
 		FileCopyClient myClient = new FileCopyClient(argv[0], argv[1], argv[2], argv[3], argv[4]);
 		clientSocket = new DatagramSocket();
+		sendbuffer = new HashMap<Long, FCpacket>();
 		(new FileCopyClient(argv[0], argv[1], argv[2], argv[3], argv[4])).start();
 		myClient.runFileCopyClient();
 	}
@@ -160,23 +160,22 @@ public class FileCopyClient extends Thread {
 	@Override
 	public void run() {
 		try {
-			System.out.println("Hello from Thread.");
 			byte[] data = new byte[FileCopyClient.UDP_PACKET_SIZE];
 			while (true) {
 				DatagramPacket udpReceivePacket = new DatagramPacket(data, data.length);
 				// Wait for data packet
-				System.out.println(clientSocket.getLocalPort());
 				clientSocket.receive(udpReceivePacket);
-				System.out.println("testing");
-						FCpacket ackpack = new FCpacket(udpReceivePacket.getData(), udpReceivePacket.getLength());
-						long receivedSeqNumber = ackpack.getSeqNum();
+				FCpacket ackpack = new FCpacket(udpReceivePacket.getData(), udpReceivePacket.getLength());
+				long receivedSeqNumber = ackpack.getSeqNum();
 				if (sendbuffer.containsKey(receivedSeqNumber)) {
 					sendbuffer.remove(receivedSeqNumber);
+//					if(sendbuffer.size() >= 0)
+//					sendbase = Collections.min(sendbuffer.keySet());
+					System.out.println(sendbase);
 				}
-				sleep(1);
 			}
 		} catch (Exception e) {
-
+			System.out.println(e);
 		}
 	}
 }
