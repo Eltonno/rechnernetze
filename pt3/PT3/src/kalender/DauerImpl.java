@@ -64,7 +64,7 @@ public class DauerImpl implements Dauer {
 
 	@Override
 	public int anteilStunden() {
-		return inStunden() * mToS - (anteilTage());
+		return inStunden() * (anteilTage());
 	}
 
 	@Override
@@ -88,8 +88,7 @@ public class DauerImpl implements Dauer {
 	
 	@Override
 	public String toString() {
-		return String.format("Dauer: %dWochen, %dTage, %dStunden, %dMinuten", inWochen(), inTagen(), inStunden(),
-				inMinuten());
+		return String.format("Dauer: %d Wochen, %d Tage, %d Stunden, %d Minuten", inWochen(),anteilTage()/24/60, anteilStunden()/60/24/7,anteilMinuten());
 	}
 
 	@Override

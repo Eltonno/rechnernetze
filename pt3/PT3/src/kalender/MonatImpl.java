@@ -8,39 +8,47 @@ import kalender.interfaces.Monat;
 public class MonatImpl implements Monat {
 
 	private Calendar intern;
+	private Datum start;
+	private Datum ende;
+	private int monat;
+	private int jahr;
 
 	public MonatImpl(int jahr, int monat) {
 		intern = Calendar.getInstance();
 		intern.clear();
 		intern.set(Calendar.YEAR, jahr);
 		intern.set(Calendar.MONTH, monat);
+		start = new DatumImpl(new TagImpl(intern.get(Calendar.YEAR), intern.get(Calendar.MONTH),
+				intern.getActualMinimum(Calendar.DAY_OF_MONTH)));
+		ende = new DatumImpl(new TagImpl(intern.get(Calendar.YEAR), intern.get(Calendar.MONTH),
+				intern.getActualMaximum(Calendar.DAY_OF_MONTH)), new UhrzeitImpl(23, 59));
+		this.monat = intern.get(Calendar.MONTH);
+		this.jahr = intern.get(Calendar.YEAR);
 	}
 
 	@Override
 	public Datum getStart() {
-		return new DatumImpl(new TagImpl(intern.get(Calendar.YEAR), intern.get(Calendar.MONTH),
-				intern.getActualMinimum(Calendar.DAY_OF_MONTH)));
+		return start;
 	}
 
 	@Override
 	public Datum getEnde() {
-		return new DatumImpl(new TagImpl(intern.get(Calendar.YEAR), intern.get(Calendar.MONTH),
-				intern.getActualMaximum(Calendar.DAY_OF_MONTH)), new UhrzeitImpl(23, 59));
+		return ende;
 	}
 
 	@Override
 	public int getMonat() {
-		return intern.get(Calendar.MONTH);
+		return monat;
 	}
 
 	@Override
 	public int getJahr() {
-		return intern.get(Calendar.YEAR);
+		return jahr;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("Monat %d,%d [" + getStart() + "," + getEnde() + "]", getMonat() + 1, getJahr());
+		return String.format("Monat %d,%d [" + start + "," + ende + "]", monat + 1, jahr);
 	}
 
 	@Override

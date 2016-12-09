@@ -14,6 +14,8 @@ import kalender.interfaces.Woche;
 public class DatumImpl implements Datum {
 
 	private Calendar intern;
+	private Tag tag;
+	private Uhrzeit uhrzeit;
 
 	public DatumImpl(Tag tag) {
 		this(tag, new UhrzeitImpl());
@@ -22,13 +24,16 @@ public class DatumImpl implements Datum {
 	public DatumImpl(Tag tag, Uhrzeit uhrzeit) {
 		intern = Calendar.getInstance();
 		intern.set(tag.getJahr(), tag.getMonat(), tag.getTagImMonat(), uhrzeit.getStunde(), uhrzeit.getMinuten());
+		this.tag = new TagImpl(intern.get(Calendar.YEAR), intern.get(Calendar.MONTH), intern.get(Calendar.DAY_OF_MONTH));
+		this.uhrzeit = new UhrzeitImpl(intern.get(Calendar.HOUR_OF_DAY), intern.get(Calendar.MINUTE));
+
 	}
 
 	public DatumImpl(Datum d) {
 		this(d.getTag(), d.getUhrzeit());
 	}
 
-	private DatumImpl(Calendar intern) {
+	DatumImpl(Calendar intern) {
 		intern = Calendar.getInstance();
 		this.intern = intern;
 	}
@@ -40,7 +45,7 @@ public class DatumImpl implements Datum {
 
 	@Override
 	public Tag getTag() {
-		return new TagImpl(intern.get(Calendar.YEAR), intern.get(Calendar.MONTH), intern.get(Calendar.DAY_OF_MONTH));
+		return tag;
 	}
 
 	@Override
@@ -55,7 +60,7 @@ public class DatumImpl implements Datum {
 
 	@Override
 	public Uhrzeit getUhrzeit() {
-		return new UhrzeitImpl(intern.get(Calendar.HOUR_OF_DAY), intern.get(Calendar.MINUTE));
+		return uhrzeit;
 	}
 
 	@Override
@@ -123,7 +128,7 @@ public class DatumImpl implements Datum {
 	
 	@Override
 	public String toString(){
-		return String.format(this.getTag().toString() + this.getUhrzeit().toString());
+		return String.format(tag.toString() + " " + uhrzeit.toString());
 	}
 
 	@Override
