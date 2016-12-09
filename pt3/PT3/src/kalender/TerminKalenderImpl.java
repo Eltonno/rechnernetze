@@ -15,11 +15,12 @@ import kalender.interfaces.Woche;
 
 public class TerminKalenderImpl implements TerminKalender {
 
-	List<Termin> termine;
+	List<Termin> termine = new ArrayList<Termin>();
 
 	@Override
 	public boolean eintragen(Termin termin) {
 		termine.add(termin);
+		System.out.println(termine);
 		return termine.contains(termin);
 	}
 
@@ -39,7 +40,9 @@ public class TerminKalenderImpl implements TerminKalender {
 
 	@Override
 	public boolean enthaeltTermin(Termin termin) {
-		return (termine.contains(termin));
+
+System.out.println(termine);
+		return termine.contains(termin);
 	}
 
 	@Override

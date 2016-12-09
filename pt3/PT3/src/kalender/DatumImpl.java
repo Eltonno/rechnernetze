@@ -20,6 +20,7 @@ public class DatumImpl implements Datum {
 	}
 
 	public DatumImpl(Tag tag, Uhrzeit uhrzeit) {
+		intern = Calendar.getInstance();
 		intern.set(tag.getJahr(), tag.getMonat(), tag.getTagImMonat(), uhrzeit.getStunde(), uhrzeit.getMinuten());
 	}
 
@@ -28,6 +29,7 @@ public class DatumImpl implements Datum {
 	}
 
 	private DatumImpl(Calendar intern) {
+		intern = Calendar.getInstance();
 		this.intern = intern;
 	}
 

@@ -1,5 +1,6 @@
 package kalender;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -19,35 +20,38 @@ public class TerminMitWiederholungImpl extends TerminImpl implements TerminMitWi
 
 	private Wiederholung wdh;
 
-	//  Konstruktorprobleme auflösen
+	// Konstruktorprobleme auflösen
 	public TerminMitWiederholungImpl(String beschreibung, Datum start, Dauer dauer, WiederholungType type, int anzahl,
 			int zyklus) {
 		super(beschreibung, start, dauer);
+		wdh = new WiederholungImpl(type, anzahl, zyklus);
 	}
 
 	public TerminMitWiederholungImpl(String beschreibung, Datum start, Dauer dauer, Wiederholung wdh) {
 		super(beschreibung, start, dauer);
+		wdh = new WiederholungImpl(wdh);
 	}
-//added crap
+
+	// added crap
 	public Wiederholung getWdh() {
 		return new WiederholungImpl(wdh);
 	}
 
 	@Override
 	public Map<Datum, Termin> termineIn(Monat monat) {
-		//  auf termineFuer zurückführen
+		// auf termineFuer zurückführen
 		return termineFuer(monat);
 	}
 
 	@Override
 	public Map<Datum, Termin> termineIn(Woche woche) {
-		//  auf termineFuer zurückführen
+		// auf termineFuer zurückführen
 		return termineFuer(woche);
 	}
 
 	@Override
 	public Map<Datum, Termin> termineAn(Tag tag) {
-		//  auf termineFuer zurückführen
+		// auf termineFuer zurückführen
 		return termineFuer(tag);
 	}
 
@@ -83,20 +87,20 @@ public class TerminMitWiederholungImpl extends TerminImpl implements TerminMitWi
 	@Override
 	public IntervallIterator<Datum> intervallIterator(int von, int bis) {
 		return new IntervallIterator<Datum>() {
-			//  end Index als upper bound merken / cursor initialisieren
+			// end Index als upper bound merken / cursor initialisieren
 			private TerminMitWiederholung current = null;
 			private int howManySeen = von;
 
 			@Override
 			public boolean hasNext() {
-				//  in Abhängigkeit von cursor und upper bound (upper bound
+				// in Abhängigkeit von cursor und upper bound (upper bound
 				// ist inkl.)
 				return howManySeen <= bis;
 			}
 
 			@Override
 			public Datum next() {
-				//  nächstes Element mit geeigneter Methode von
+				// nächstes Element mit geeigneter Methode von
 				// Wiederholung berechnen
 				if (current == null) {
 					current = TerminMitWiederholungImpl.this;
@@ -114,26 +118,33 @@ public class TerminMitWiederholungImpl extends TerminImpl implements TerminMitWi
 	@Override
 	public Map<Datum, Termin> termineFuer(DatumsGroesse groesse) {
 		// TODO Indizes fuer Start und End Intervall berechnen
-		int startIndex = 0;
-		int endIndex;
+		System.out.println(groesse.getStart().differenzInTagen(this.getDatum()));
+		int startIndex = (int)(groesse.getStart().differenzInTagen(this.getDatum())) / wdh.intervallLaenge();
+		int endIndex = (int) groesse.getEnde().differenzInTagen(this.dat) / wdh.intervallLaenge();
+		System.out.println(startIndex + "; " + endIndex);
 		// TODO Indizes auf Gültigkeit prüfen
 		// wenn endIndex > maxIntervallIndex dann setze endIndex auf
 		// maxIntervallIndex
-		if (endIndex > wdh.maxIntervallIndex()){
+		if (endIndex > wdh.maxIntervallIndex()) {
 			endIndex = wdh.maxIntervallIndex();
 		}
 		//
 		// wenn endIndex < startIndex || endIndex < 0 || startIndex < 0 ||
 		// endIndex > maxIntervallIndex
 		// gib null zurück
-		if(endIndex < startIndex || endIndex < 0 || startIndex < 0 || endIndex > wdh.maxIntervallIndex()){
+		if (endIndex < startIndex || endIndex < 0 || startIndex < 0 || endIndex > wdh.maxIntervallIndex()) {
 			return null;
 		}
 		//
 		// TODO hier den Intervalliterator nutzen
 		// Map erzeugen und die Wiederholungen einsammeln
-
-		return null;
+		IntervallIterator<Datum> iv = intervallIterator(startIndex, endIndex);
+		Map<Datum, Termin> ter = new HashMap<Datum, Termin>();
+		while(iv.hasNext()){
+			Datum datum = iv.next();
+			ter.put(datum , this);
+		}
+		return ter;
 	}
 
 	public class WiederholungImpl implements Wiederholung {
@@ -149,6 +160,7 @@ public class TerminMitWiederholungImpl extends TerminImpl implements TerminMitWi
 		}
 
 		public WiederholungImpl(Wiederholung wdh) {
+			//System.out.println(wdh.getType() + "  " + wdh.anzahl() + "  " + wdh.getZyklus());
 			this(wdh.getType(), wdh.anzahl(), wdh.getZyklus());
 		}
 
@@ -270,6 +282,11 @@ public class TerminMitWiederholungImpl extends TerminImpl implements TerminMitWi
 			return new WiederholungImpl(wdhType, anzahl + wdhCount, cycle);
 		}
 
+	}
+
+	@Override
+	public String toString() {
+		return "TerminMitWiederholungImpl [wdh=" + wdh + "]";
 	}
 
 }

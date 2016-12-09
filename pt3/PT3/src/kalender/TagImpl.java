@@ -12,12 +12,14 @@ public class TagImpl implements Tag {
 	private Calendar intern;
 
 	public TagImpl(int jahr, int tagImJahr) {
+		intern = Calendar.getInstance();
 		intern.clear();
 		intern.set(Calendar.YEAR, jahr);
 		intern.set(Calendar.DAY_OF_YEAR, tagImJahr);
 	}
 
 	public TagImpl(int jahr, int monat, int tagImMonat) {
+		intern = Calendar.getInstance();
 		intern.clear();
 		intern.set(jahr, monat, tagImMonat);
 	}
@@ -83,8 +85,7 @@ public class TagImpl implements Tag {
 
 	@Override
 	public String toString() {
- 		return String.format("Tag %d,%d.%d [" + getStart() + "," + getEnde() + "]", getTagImMonat(), getMonat() + 1,
-				getJahr());
+ 		return String.format("Tag %d,%d.%d [" + getStart() + "," + getEnde() + "]", getTagImMonat(), getMonat() + 1, getJahr());
 	}
 
 	@Override
