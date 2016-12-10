@@ -10,16 +10,27 @@ import kalender.interfaces.Tag;
 public class TagImpl implements Tag {
 
 	private Calendar intern;
+	private int tagImMonat;
+	private int monat;
+	private int jahr;
 
 	public TagImpl(int jahr, int tagImJahr) {
+		intern = Calendar.getInstance();
 		intern.clear();
 		intern.set(Calendar.YEAR, jahr);
 		intern.set(Calendar.DAY_OF_YEAR, tagImJahr);
+		tagImMonat = intern.get(Calendar.DAY_OF_MONTH);
+		monat = intern.get(Calendar.MONTH);
+		this.jahr = intern.get(Calendar.YEAR);
 	}
 
 	public TagImpl(int jahr, int monat, int tagImMonat) {
+		intern = Calendar.getInstance();
 		intern.clear();
 		intern.set(jahr, monat, tagImMonat);
+		this.tagImMonat = intern.get(Calendar.DAY_OF_MONTH);
+		this.monat = intern.get(Calendar.MONTH);
+		this.jahr = intern.get(Calendar.YEAR);
 	}
 
 	public TagImpl(Tag tag) {
@@ -43,12 +54,12 @@ public class TagImpl implements Tag {
 
 	@Override
 	public int getJahr() {
-		return intern.get(Calendar.YEAR);
+		return jahr;
 	}
 
 	@Override
 	public int getMonat() {
-		return intern.get(Calendar.MONTH);
+		return monat;
 	}
 
 	@Override
@@ -58,7 +69,7 @@ public class TagImpl implements Tag {
 
 	@Override
 	public int getTagImMonat() {
-		return intern.get(Calendar.DAY_OF_MONTH);
+		return tagImMonat;
 	}
 
 	@Override
@@ -83,8 +94,7 @@ public class TagImpl implements Tag {
 
 	@Override
 	public String toString() {
- 		return String.format("Tag %d,%d.%d [" + getStart() + "," + getEnde() + "]", getTagImMonat(), getMonat() + 1,
-				getJahr());
+ 		return String.format("Tag %d,%d.%d", tagImMonat, monat + 1, jahr);
 	}
 
 	@Override

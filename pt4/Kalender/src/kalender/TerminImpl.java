@@ -88,7 +88,7 @@ public class TerminImpl implements Termin {
 
 	@Override
 	public String toString() {
-		return String.format(this.getDatum().toString() + this.getDauer().toString() + beschr);
+		return String.format(beschr + "; " + this.getDatum().toString() + "; " + this.getDauer().toString());
 	}
 
 	@Override

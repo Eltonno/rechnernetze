@@ -6,6 +6,8 @@ import kalender.interfaces.Uhrzeit;
 
 public class UhrzeitImpl implements Uhrzeit {
 	private Calendar intern;
+	private int stunde;
+	private int minuten;
 
 	public UhrzeitImpl() {
 		this(0, 0);
@@ -19,6 +21,8 @@ public class UhrzeitImpl implements Uhrzeit {
 		intern.clear();
 		intern.set(Calendar.HOUR_OF_DAY, stunde);
 		intern.set(Calendar.MINUTE, minute);
+		this.stunde = intern.get(Calendar.HOUR_OF_DAY);
+		this.minuten = intern.get(Calendar.MINUTE);
 	}
 
 	public UhrzeitImpl(Uhrzeit o) {
@@ -39,12 +43,12 @@ public class UhrzeitImpl implements Uhrzeit {
 
 	@Override
 	public int getStunde() {
-		return intern.get(Calendar.HOUR_OF_DAY);
+		return stunde;
 	}
 
 	@Override
 	public int getMinuten() {
-		return intern.get(Calendar.MINUTE);
+		return minuten;
 	}
 
 	public boolean equals(Object obj) {
@@ -58,8 +62,7 @@ public class UhrzeitImpl implements Uhrzeit {
 	
 	@Override
 	public String toString() {
-		return String.format("Uhrzeit: %2d:%2d", getStunde(),
-				getMinuten());
+		return String.format("Uhrzeit: %2d:%2d", stunde, minuten);
 	}
 
 	@Override
