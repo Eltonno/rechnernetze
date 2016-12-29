@@ -34,6 +34,7 @@ public class Server {
                     ipPacket.setSourceAddress(ipPacket.getDestinationAddress());
                     ipPacket.setDestinationAddress(swap);
                     networkLayer.sendPacket(ipPacket);
+                    System.out.println("Sent packet: "+ ipPacket);
                 }
             } catch (IOException e) {
                 System.err.println("Error echoing package: " + e.toString());
