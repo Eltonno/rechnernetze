@@ -10,6 +10,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +27,17 @@ public class Router extends Thread {
 		while (i < 2) {
 			System.out.println("Vor getpacket");
 			ipp = nl.getPacket();
-
 			System.out.println(ipp.getDestinationAddress());
 			System.out.println(ipp.getSourceAddress());
-
-			if (!routtable.containsKey(String.valueOf(ipp.getDestinationAddress()))) {
+			ipp.setHopLimit(ipp.getHopLimit()-1);
+			if(ipp.getHopLimit()<1){
+				ControlPacket.Type controlType = ControlPacket.Type.valueOf("TimeExceeded");
+				ControlPacket controlPacket = new ControlPacket(controlType, new byte[0]);
+				ipp.setControlPayload(controlPacket.getBytes());
+				// ipp.setDestinationAddress(ipp.getSourceAddress());
+				// ipp.setNextHopIp(ipp.getDestinationAddress());
+				nl.sendPacket(ipp);
+			} else if (!routtable.containsKey(String.valueOf(ipp.getDestinationAddress()))) {
 				System.out.println("HIER");
 				ControlPacket.Type controlType = ControlPacket.Type.valueOf("DestinationUnreachable");
 				ControlPacket controlPacket = new ControlPacket(controlType, new byte[0]);
@@ -46,7 +53,7 @@ public class Router extends Thread {
 						.getByName((routtable.get(String.valueOf(ipp.getDestinationAddress()))[0]));
 				ipp.setNextHopIp(nexthopip);
 				System.out.println("Nexthopip: " + nexthopip + " Nextport: " + ipp.getNextHopPort());
-			
+			System.out.println(Arrays.toString(nexthopip.getAddress()));
 				nl.sendPacket(ipp);
 				// IpPacket retp;
 				// retp = nl.getPacket();
