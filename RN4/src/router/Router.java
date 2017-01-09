@@ -158,8 +158,13 @@ public class Router extends Thread {
 
 	}
 
+	/*
+	* @param args[0] -> Pfad zur routen.txt
+	* @param args[1] -> Port
+	*/
+
 	public static void main(String[] args) throws IOException {
-		nl = new NetworkLayer(5000);
+		nl = new NetworkLayer(args[1]);
 		Scanner in = new Scanner(new FileReader(argv[0]));
 		while (in.hasNextLine()) {
 			String line = in.nextLine();
