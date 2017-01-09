@@ -160,7 +160,7 @@ public class Router extends Thread {
 
 	public static void main(String[] args) throws IOException {
 		nl = new NetworkLayer(5000);
-		Scanner in = new Scanner(new FileReader("/Users/ditmarlange/git/rechnernetze/RN4/src/router/routen.txt"));
+		Scanner in = new Scanner(new FileReader(argv[0]));
 		while (in.hasNextLine()) {
 			String line = in.nextLine();
 			String[] stary = line.split(";");
