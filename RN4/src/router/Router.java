@@ -164,8 +164,8 @@ public class Router extends Thread {
 	*/
 
 	public static void main(String[] args) throws IOException {
-		nl = new NetworkLayer(args[1]);
-		Scanner in = new Scanner(new FileReader(argv[0]));
+		nl = new NetworkLayer(Integer.valueOf(args[1]));
+		Scanner in = new Scanner(new FileReader(args[0]));
 		while (in.hasNextLine()) {
 			String line = in.nextLine();
 			String[] stary = line.split(";");
